@@ -2,28 +2,26 @@
 import NavBar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
-import { SignIn, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
-import * as styles from './_signin.module.css';
+import { SignUp, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
+import * as styles from './_signup.module.css';
 export default function Home() {
   console.log(styles);
   return (
     <main>
       <NavBar />
-      {/* <Box maxW="7xl" mx={`auto`} pt={5} px={{ base: 2, sm: 10, md: 17 }}>
-        <Container maxW="7xl" px={1} mx="auto"> */}
       <SignedIn>
         <UserButton />
       </SignedIn>
 
       <SignedOut>
-        <SignIn
+        <SignUp
           appearance={{
             elements: {
               rootBox: styles.boxCenter,
               formButtonPrimary: styles.orangeButton,
             },
           }}
-          signUpUrl="/signup"
+          signInUrl="/signin"
         />
       </SignedOut>
       {/* </Container>

@@ -1,0 +1,14 @@
+.boxCenter {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    margin-top: 20px;
+    align-items: center;
+}
+
+.orangeButton {
+    background-color: #ED8936;
+    color: white;
+}
