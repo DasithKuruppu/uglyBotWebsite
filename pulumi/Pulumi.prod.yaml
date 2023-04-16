@@ -1,0 +1,5 @@
+config:
+  aws:region: us-east-1
+  uglyBotWebsite:errorDocument: 404.html
+  uglyBotWebsite:indexDocument: index.html
+  uglyBotWebsite:path: ../public

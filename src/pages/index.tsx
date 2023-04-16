@@ -1,14 +1,16 @@
-import Title from '@/components/Title';
-
+// import BreadCrumbs from '@/components/BreadCrumbs';
+import HomePage from './_home';
+import NavBar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { SEO } from '@/components/SEO';
 export default function Home() {
   return (
     <main>
-      <Title>Hello TypeScript!</Title>
-      <p>A TypeScript starter for Gatsby. Great for advanced users.</p>
-      <p>
-        Follow me on Twitter (
-        <a href="https://twitter.com/jpedroschmitz">@jpedroschmitz</a>)
-      </p>
+      <NavBar />
+      <HomePage />
+      <Footer />
     </main>
   );
 }
+
+export const Head = () => <SEO />;
