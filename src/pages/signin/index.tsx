@@ -5,7 +5,6 @@ import { SEO } from '@/components/SEO';
 import { SignIn, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 import * as styles from './_signin.module.css';
 export default function Home() {
-  console.log(styles);
   return (
     <main>
       <NavBar />

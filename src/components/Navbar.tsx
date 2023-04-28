@@ -47,10 +47,10 @@ const NAV_ITEMS: Array<NavItem> = [
       },
     ],
   },
-  //   {
-  //     label: `About`,
-  //     href: `#`,
-  //   },
+  {
+    label: `Our Discord`,
+    href: `https://discord.gg/SmF2qJeF6P`,
+  },
 ];
 
 export default function WithSubnavigation() {
@@ -61,8 +61,8 @@ export default function WithSubnavigation() {
       <Flex
         bg={useColorModeValue(`white`, `gray.800`)}
         color={useColorModeValue(`gray.600`, `white`)}
-        minH={`80px`}
-        py={{ base: 4 }}
+        minH={`60px`}
+        py={{ base: 1 }}
         px={{ base: 5 }}
         borderBottom={1}
         borderStyle={`solid`}
@@ -71,7 +71,7 @@ export default function WithSubnavigation() {
       >
         <Flex
           flex={{ base: `auto`, md: `auto` }}
-          maxW={{ base: `80px`, md: `auto` }}
+          maxW={{ base: `60px`, md: `auto` }}
           ml={{ base: -2 }}
           display={{ base: `flex`, md: `none` }}
         >
@@ -167,7 +167,7 @@ const DesktopNav = () => {
               <Link
                 p={2}
                 href={navItem.href ?? `#`}
-                fontSize={`2xl`}
+                fontSize={`xl`}
                 fontWeight={500}
                 lineHeight="2"
                 color={linkColor}

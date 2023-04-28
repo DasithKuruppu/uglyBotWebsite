@@ -1,7 +1,8 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as aws from '@pulumi/aws';
 import * as syncedFolder from '@pulumi/synced-folder';
-
+import { StagingRaids } from './dynamodb/raids';
+import { GraphQLAPIkey, GraphQLEndpoint } from './graphQL';
 // Import the program's configuration settings.
 const config = new pulumi.Config();
 const path = config.get(`path`) || `../public`;
@@ -80,3 +81,6 @@ export const originURL = pulumi.interpolate`http://${bucket.websiteEndpoint}`;
 export const originHostname = bucket.websiteEndpoint;
 export const cdnURL = pulumi.interpolate`https://${cdn.domainName}`;
 export const cdnHostname = cdn.domainName;
+
+export const tableStagingRaids = StagingRaids.name;
+export { GraphQLEndpoint, GraphQLAPIkey };

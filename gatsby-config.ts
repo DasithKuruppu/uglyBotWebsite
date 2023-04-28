@@ -1,7 +1,8 @@
 import type { GatsbyConfig } from 'gatsby';
 require(`dotenv`).config({
-  path: `.env`,
+  path: `.env.${process.env.NODE_ENV}`,
 });
+console.log({ env: process.env.NODE_ENV });
 const config: GatsbyConfig = {
   // Since `gatsby-plugin-typescript` is automatically included in Gatsby you
   // don't need to define it here (just if you need to change the options)

@@ -67,7 +67,7 @@ export default function BasicStatistics() {
         />
         <StatsCard
           title={`Servers`}
-          stat={`75`}
+          stat={`100+`}
           bg={`green.500`}
           icon={<FiServer size={`3em`} />}
         />
