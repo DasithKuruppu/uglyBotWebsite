@@ -16,6 +16,7 @@ import ListRaids from './_list';
 import { SEO } from '@/components/SEO';
 import { MultiSelectTheme } from 'chakra-multiselect';
 import BreadCrumbs from '@/components/BreadCrumbs';
+import { getMemberData } from '@/hooks/useMemberData';
 
 const theme = extendTheme({
   components: {
@@ -38,8 +39,10 @@ export default function Dashboard() {
     (async () => {
       const serverDataList =
         (isSignedIn && (await getServerRaidData(user?.id as string))) || [];
-
-      console.log({ serverDataList });
+      console.log({ userId: user?.id });
+      const memberClasses =
+        (isSignedIn && (await getMemberData(user?.id))) || [];
+      console.log({ memberClasses });
       setServerList(
         serverDataList.map(({ id, name, owner, icon, raids }) => {
           const avatar = icon

@@ -1,19 +1,15 @@
 import * as aws from '@pulumi/aws';
-import * as pulumi from '@pulumi/pulumi';
-import { tables } from './dynamodb';
-import { createIamRole } from './createIAMRole';
-import { graphQLHandlerFunction } from './lambdas/queryHandler';
-const stackName = pulumi.getStack();
-const stackMap: Record<string, string> = {
-  website: `staging`,
-  'website-prod': `staging`,
-};
+import { ProdRaids } from '../dynamodb/raids';
+import { createIamRole } from '../createIAMRole';
+import { graphQLHandlerFunction } from '../lambdas/queryHandler';
+import { createMemberDataSources } from './members/members';
+import { getEnvironmentFromStack } from '../utils/stackEnvMap';
 
-const environmentName = stackMap[stackName];
-console.log({ environmentName, stackName });
+const environmentName = getEnvironmentFromStack();
+console.log({ environmentName });
 // Create IAM role and policy wiring
 
-const raidsTable = tables[environmentName].raids;
+const raidsTable = ProdRaids;
 const role = createIamRole(
   `raidsTableIAMRole`,
   raidsTable,
@@ -25,6 +21,18 @@ const schema = `
     type Query {
         getRaids(id: String!, userId: String!): [Raid]
         getServerRaids(userId: String!): [ServerRaids]
+        getMembers(id: String!): [Member]
+    }
+
+    type Member {
+        discordMemberId: String!
+        className: String
+        artifactList: [String]
+        mountsList: [String]
+        optionalClasses: [String]
+        serverId: String
+        updatedAt: String
+        userStatus: String
     }
 
     type ServerRaids {
@@ -54,7 +62,7 @@ const schema = `
     }`;
 
 // Create API accessible with a key
-const api = new aws.appsync.GraphQLApi(`${environmentName}api`, {
+export const api = new aws.appsync.GraphQLApi(`${environmentName}api`, {
   authenticationType: `API_KEY`,
   schema,
 });
@@ -136,6 +144,11 @@ const getRaidsResolver = new aws.appsync.Resolver(
   },
 );
 
+const { membersDataSource, getMemebersResolver } = createMemberDataSources({
+  api,
+  environmentName,
+});
+
 // A resolver for the [addTenant] mutation
 // const addResolver = new aws.appsync.Resolver(`add-resolver`, {
 //   apiId: api.id,
@@ -155,9 +168,14 @@ const getRaidsResolver = new aws.appsync.Resolver(
 //   responseTemplate: `$util.toJson($ctx.result)`,
 // });
 
-export const GraphQLEndpoint = api.uris.GRAPHQL;
-export const GraphQLAPIkey = apiKey.key;
-
+const GraphQLEndpoint = api.uris.GRAPHQL;
+const GraphQLAPIkey = apiKey.key;
+export {
+  getMemebersResolver,
+  membersDataSource,
+  GraphQLAPIkey,
+  GraphQLEndpoint,
+};
 /**
  *
  * An example query:

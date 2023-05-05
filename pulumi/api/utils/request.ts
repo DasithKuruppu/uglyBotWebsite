@@ -3,9 +3,9 @@ import https from 'https';
 export const getHTTP = () => https;
 export const HTTPRequest = (opts: https.RequestOptions = {}) => {
   const HTTPClient = getHTTP();
-  console.log({ HTTPClient });
   return new Promise((resolve, reject) => {
     const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
+    console.log({ CLERK_SECRET_KEY });
     const options = {
       method: `GET`,
       hostname: `api.clerk.com`,

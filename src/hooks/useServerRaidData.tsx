@@ -8,9 +8,12 @@ interface IServerRaidData {
   permissions: string;
   raids: any[];
 }
+
 export const getServerRaidData = async (userId: string) => {
+  const GRAPHQL_ENDPOINT = process.env.GRAPHQL_ENDPOINT as string;
+  const API_KEY = process.env.GRAPHQL_API_KEY as string;
   const serverData: { getServerRaids: IServerRaidData[] } = await request({
-    url: `https://cd3mw4xsrzg2veu5a6flni5yzm.appsync-api.us-east-1.amazonaws.com/graphql`,
+    url: GRAPHQL_ENDPOINT,
     document: gql`
       query getServerRaidsData($userId: String!) {
         getServerRaids(userId: $userId) {
@@ -35,7 +38,7 @@ export const getServerRaidData = async (userId: string) => {
     `,
     variables: { userId },
     requestHeaders: {
-      'x-api-key': `da2-sqp3uuztjrcurktkujm6fwtmiu`,
+      'x-api-key': API_KEY,
     },
   });
   console.log({ serverData });

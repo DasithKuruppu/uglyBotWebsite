@@ -3,7 +3,7 @@ import * as aws from '@pulumi/aws';
 export function createIamRole(
   name: string,
   table: aws.dynamodb.Table,
-  lambda: aws.lambda.Function,
+  lambda?: aws.lambda.Function,
 ) {
   const role = new aws.iam.Role(`${name}-role`, {
     assumeRolePolicy: aws.iam.getPolicyDocumentOutput({
@@ -35,11 +35,15 @@ export function createIamRole(
           resources: [table.arn],
           effect: `Allow`,
         },
-        {
-          actions: [`lambda:InvokeFunction`],
-          resources: [lambda.arn],
-          effect: `Allow`,
-        },
+        ...(lambda
+          ? [
+              {
+                actions: [`lambda:InvokeFunction`],
+                resources: [lambda.arn],
+                effect: `Allow`,
+              },
+            ]
+          : []),
       ],
     }).json,
   });

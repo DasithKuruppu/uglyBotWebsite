@@ -27,9 +27,11 @@ export const graphQLHandler = async (
     const discordTokenBot = process.env.DISCORD_BOT_TOKEN;
     const userId = event.context?.arguments?.userId;
     const providerName = `oauth_discord`;
-    const [responseBody]: any = await HTTPRequest({
+    const response: any = await HTTPRequest({
       path: `/v1/users/${userId}/oauth_access_tokens/${providerName}`,
     });
+    console.log({ response: JSON.stringify(response) });
+    const [responseBody] = response;
     //
     const discordGetChannelMessage = ({ channelId, messageId }: any) =>
       HTTPRequest({
@@ -40,7 +42,6 @@ export const graphQLHandler = async (
           Authorization: `Bot ${discordTokenBot}`,
         },
       });
-
     // const discordUserResponse = await HTTPRequest({
     //   path: `/api/v9/users/@me`,
     //   hostname: `discord.com`,
@@ -58,7 +59,7 @@ export const graphQLHandler = async (
         Authorization: `Bearer ${responseBody?.token}`,
       },
     })) as any[];
-
+    console.log({ discordUserGuildsResponse });
     const discordBotGuildsResponse = (await HTTPRequest({
       path: `/api/v9/users/@me/guilds`,
       hostname: `discord.com`,
@@ -67,6 +68,8 @@ export const graphQLHandler = async (
         Authorization: `Bot ${discordTokenBot}`,
       },
     })) as any[];
+
+    console.log({ discordBotGuildsResponse });
     const discordBotGuildIds = discordBotGuildsResponse?.map(
       ({ id }: any) => id,
     ) as string[];

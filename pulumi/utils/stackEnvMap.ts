@@ -1,9 +1,11 @@
+import { getStack } from '@pulumi/pulumi';
 import { environmentTypes } from '../api/initialize/environment';
-
-export const getEnvironmentFromStack = (stackName: string) => {
+const stack = getStack();
+export const getEnvironmentFromStack = (stackName: string = stack) => {
   return (
     {
       website: environmentTypes.PRODUCTION,
-    }[stackName] || `development`
+      developWebsite: environmentTypes.DEVELOPMENT,
+    }[stackName] || environmentTypes.DEVELOPMENT
   );
 };

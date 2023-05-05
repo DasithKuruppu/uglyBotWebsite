@@ -1,18 +1,20 @@
 import * as dotenv from 'dotenv';
 import process from 'process';
+import { getEnvironmentFromStack } from '../../utils/stackEnvMap';
 
 export const DEVELOP_ENV_CONFIG_PATH = `/.env.development`;
 export const PRODUCTION_ENV_CONFIG_PATH = `/.env.production`;
 
 export enum environmentTypes {
-  DEVELOPMENT = `DEVELOPMENT`,
-  PRODUCTION = `PRODUCTION`,
+  DEVELOPMENT = `development`,
+  PRODUCTION = `production`,
 }
 
 const environmentsInitialize: () => dotenv.DotenvConfigOutput = () => {
   const currentEnv =
     (process.env.environment as environmentTypes) ||
-    environmentTypes.PRODUCTION;
+    getEnvironmentFromStack() ||
+    environmentTypes.DEVELOPMENT;
   const lambdaRootPath = process.env.LAMBDA_TASK_ROOT;
   // If its a LambdaEnv make no calls to process.cwd() due to pulumi serialization issues
   const envPaths = {
