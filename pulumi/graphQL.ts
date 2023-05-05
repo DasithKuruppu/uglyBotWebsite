@@ -2,7 +2,7 @@ import * as aws from '@pulumi/aws';
 import * as pulumi from '@pulumi/pulumi';
 import { tables } from './dynamodb';
 import { createIamRole } from './createIAMRole';
-
+import { graphQLHandlerFunction } from './lambdas/queryHandler';
 const stackName = pulumi.getStack();
 const stackMap: Record<string, string> = {
   website: `staging`,
@@ -14,18 +14,39 @@ console.log({ environmentName, stackName });
 // Create IAM role and policy wiring
 
 const raidsTable = tables[environmentName].raids;
-const role = createIamRole(`raidsTableIAMRole`, raidsTable);
+const role = createIamRole(
+  `raidsTableIAMRole`,
+  raidsTable,
+  graphQLHandlerFunction,
+);
 
 // GraphQL Schema
 const schema = `
     type Query {
-        getRaids(id: String!): [Raid]
+        getRaids(id: String!, userId: String!): [Raid]
+        getServerRaids(userId: String!): [ServerRaids]
+    }
+
+    type ServerRaids {
+        id: String
+        name: String
+        icon: String
+        owner: Boolean
+        permissions: String
+        raids: [Raid]
     }
 
     type Raid {
-        raidId: String
+        raidId: String!
         title: String
         authorName: String
+        description: String
+        eventDate: String
+        type: String
+        updatedAt: String
+        messageId: String
+        channelId: String
+        serverId: String
     }
 
     schema {
@@ -42,7 +63,7 @@ const apiKey = new aws.appsync.ApiKey(`${environmentName}key`, {
 });
 
 // Link a data source to the Dynamo DB Table
-const dataSource = new aws.appsync.DataSource(
+const raidsDataSource = new aws.appsync.DataSource(
   `${environmentName}raidsDataSource`,
   {
     name: `${environmentName}raidsDataSource`,
@@ -55,12 +76,49 @@ const dataSource = new aws.appsync.DataSource(
   },
 );
 
+// Link a data source to the lambda fn
+const dataSourceLambdaRequestProcessor = new aws.appsync.DataSource(
+  `${environmentName}LambdaRequestProcessorSource`,
+  {
+    name: `${environmentName}LambdaRequestProcessor`,
+    apiId: api.id,
+    type: `AWS_LAMBDA`,
+    lambdaConfig: {
+      functionArn: graphQLHandlerFunction.arn,
+    },
+    serviceRoleArn: role.arn,
+  },
+);
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-const getResolver = new aws.appsync.Resolver(
+const getServerResolver = new aws.appsync.Resolver(
+  `${environmentName}serversRaidsResolver`,
+  {
+    apiId: api.id,
+    dataSource: dataSourceLambdaRequestProcessor.name,
+    type: `Query`,
+    field: `getServerRaids`,
+    requestTemplate: `{
+      "version": "2018-05-29",
+      "operation": "Invoke",
+      "payload": {
+        "field": "getServerRaids",
+        "context": $util.toJson($context),
+        "operation" : "Query",
+        "selectionSetList": $util.toJson($context.info.selectionSetList),
+        "selectionSetGraphQL": $util.toJson($context.info.selectionSetGraphQL),
+      }
+       
+    }`,
+    responseTemplate: `$util.toJson($ctx.result)`,
+  },
+);
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+const getRaidsResolver = new aws.appsync.Resolver(
   `${environmentName}raidsResolver`,
   {
     apiId: api.id,
-    dataSource: dataSource.name,
+    dataSource: raidsDataSource.name,
     type: `Query`,
     field: `getRaids`,
     requestTemplate: `{
@@ -72,16 +130,16 @@ const getResolver = new aws.appsync.Resolver(
             ":pkey": $util.dynamodb.toDynamoDBJson($ctx.args.id),
           }
         }
-       
+
     }`,
     responseTemplate: `$util.toJson($ctx.result.items)`,
   },
 );
 
-// // A resolver for the [addTenant] mutation
+// A resolver for the [addTenant] mutation
 // const addResolver = new aws.appsync.Resolver(`add-resolver`, {
 //   apiId: api.id,
-//   dataSource: dataSource.name,
+//   dataSource: raidsDataSource.name,
 //   type: `Mutation`,
 //   field: `addTenant`,
 //   requestTemplate: `{

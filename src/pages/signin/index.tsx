@@ -23,6 +23,7 @@ export default function Home() {
             },
           }}
           signUpUrl="/signup"
+          redirectUrl="/dashboard"
         />
       </SignedOut>
       {/* </Container>

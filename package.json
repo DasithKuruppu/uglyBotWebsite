@@ -37,6 +37,7 @@
     "@chakra-ui/react": "2.5.5",
     "@emotion/react": "11.10.6",
     "@emotion/styled": "11.10.6",
+    "chakra-multiselect": "0.4.1",
     "framer-motion": "10.11.5",
     "gatsby": "5.8.1",
     "gatsby-plugin-clerk": "4.2.4",

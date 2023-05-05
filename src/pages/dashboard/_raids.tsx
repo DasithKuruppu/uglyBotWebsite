@@ -4,14 +4,17 @@ import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
 import { chakra } from '@chakra-ui/react';
 import { getRaidData } from '../../hooks/useRaidData';
+import { useUser } from 'gatsby-plugin-clerk';
 import { useEffect } from 'react';
 export default function Home() {
+  const { user, isSignedIn } = useUser();
+
   useEffect(() => {
     (async () => {
-      const raidData = await getRaidData();
-      console.log({ raidData });
+      const raidData = isSignedIn && (await getRaidData(user?.id as string));
+      console.log({ raidData, user, isSignedIn });
     })();
-  }, []);
+  }, [user?.id, isSignedIn]);
   return (
     <main>
       <NavBar />
