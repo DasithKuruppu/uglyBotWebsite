@@ -2,7 +2,7 @@ import * as aws from '@pulumi/aws';
 
 export function createIamRole(
   name: string,
-  table: aws.dynamodb.Table,
+  tables: aws.dynamodb.Table[],
   lambda?: aws.lambda.Function,
 ) {
   const role = new aws.iam.Role(`${name}-role`, {
@@ -32,7 +32,7 @@ export function createIamRole(
             `dynamodb:Scan`,
             `dynamodb:Query`,
           ],
-          resources: [table.arn],
+          resources: tables.map((table) => table.arn),
           effect: `Allow`,
         },
         ...(lambda

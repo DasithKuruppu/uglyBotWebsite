@@ -3,16 +3,18 @@ import { ProdRaids } from '../dynamodb/raids';
 import { createIamRole } from '../createIAMRole';
 import { graphQLHandlerFunction } from '../lambdas/queryHandler';
 import { createMemberDataSources } from './members/members';
+import { removeClassDataSources } from './classes/removeClass';
+import { setDefaultClassDataSources } from './classes/setDefaultClass';
+import { prodMembers } from '../dynamodb/members';
 import { getEnvironmentFromStack } from '../utils/stackEnvMap';
 
 const environmentName = getEnvironmentFromStack();
 console.log({ environmentName });
 // Create IAM role and policy wiring
 
-const raidsTable = ProdRaids;
 const role = createIamRole(
   `raidsTableIAMRole`,
-  raidsTable,
+  [ProdRaids, prodMembers],
   graphQLHandlerFunction,
 );
 
@@ -24,12 +26,18 @@ const schema = `
         getMembers(id: String!): [Member]
     }
 
+    type Mutation {
+      removeClass(userId: String!, className: String!): [Member]
+      setDefaultClass(userId: String!, className: String!): [Member]
+    }
+
     type Member {
         discordMemberId: String!
         className: String
-        artifactList: [String]
+        artifactsList: [String]
         mountsList: [String]
         optionalClasses: [String]
+        default: Boolean
         serverId: String
         updatedAt: String
         userStatus: String
@@ -59,6 +67,7 @@ const schema = `
 
     schema {
         query: Query
+        mutation: Mutation
     }`;
 
 // Create API accessible with a key
@@ -70,19 +79,19 @@ const apiKey = new aws.appsync.ApiKey(`${environmentName}key`, {
   apiId: api.id,
 });
 
-// Link a data source to the Dynamo DB Table
-const raidsDataSource = new aws.appsync.DataSource(
-  `${environmentName}raidsDataSource`,
-  {
-    name: `${environmentName}raidsDataSource`,
-    apiId: api.id,
-    type: `AMAZON_DYNAMODB`,
-    dynamodbConfig: {
-      tableName: raidsTable.name,
-    },
-    serviceRoleArn: role.arn,
-  },
-);
+// // Link a data source to the Dynamo DB Table
+// const raidsDataSource = new aws.appsync.DataSource(
+//   `${environmentName}raidsDataSource`,
+//   {
+//     name: `${environmentName}raidsDataSource`,
+//     apiId: api.id,
+//     type: `AMAZON_DYNAMODB`,
+//     dynamodbConfig: {
+//       tableName: raidsTable.name,
+//     },
+//     serviceRoleArn: role.arn,
+//   },
+// );
 
 // Link a data source to the lambda fn
 const dataSourceLambdaRequestProcessor = new aws.appsync.DataSource(
@@ -122,33 +131,45 @@ const getServerResolver = new aws.appsync.Resolver(
 );
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-const getRaidsResolver = new aws.appsync.Resolver(
-  `${environmentName}raidsResolver`,
-  {
-    apiId: api.id,
-    dataSource: raidsDataSource.name,
-    type: `Query`,
-    field: `getRaids`,
-    requestTemplate: `{
-        "version": "2017-02-28",
-        "operation": "Query",
-        "query" : {
-          "expression": "raidId = :pkey",
-          "expressionValues": {
-            ":pkey": $util.dynamodb.toDynamoDBJson($ctx.args.id),
-          }
-        }
+// const getRaidsResolver = new aws.appsync.Resolver(
+//   `${environmentName}raidsResolver`,
+//   {
+//     apiId: api.id,
+//     dataSource: raidsDataSource.name,
+//     type: `Query`,
+//     field: `getRaids`,
+//     requestTemplate: `{
+//         "version": "2017-02-28",
+//         "operation": "Query",
+//         "query" : {
+//           "expression": "raidId = :pkey",
+//           "expressionValues": {
+//             ":pkey": $util.dynamodb.toDynamoDBJson($ctx.args.id),
+//           }
+//         }
 
-    }`,
-    responseTemplate: `$util.toJson($ctx.result.items)`,
-  },
-);
+//     }`,
+//     responseTemplate: `$util.toJson($ctx.result.items)`,
+//   },
+// );
 
-const { membersDataSource, getMemebersResolver } = createMemberDataSources({
+const { getMembersResolver } = createMemberDataSources({
   api,
   environmentName,
+  dataSourceLambdaRequestProcessor,
 });
 
+const { removeClassResolver } = removeClassDataSources({
+  api,
+  environmentName,
+  dataSourceLambdaRequestProcessor,
+});
+
+const { setDefaultClassResolver } = setDefaultClassDataSources({
+  api,
+  environmentName,
+  dataSourceLambdaRequestProcessor,
+});
 // A resolver for the [addTenant] mutation
 // const addResolver = new aws.appsync.Resolver(`add-resolver`, {
 //   apiId: api.id,
@@ -171,10 +192,11 @@ const { membersDataSource, getMemebersResolver } = createMemberDataSources({
 const GraphQLEndpoint = api.uris.GRAPHQL;
 const GraphQLAPIkey = apiKey.key;
 export {
-  getMemebersResolver,
-  membersDataSource,
+  getMembersResolver,
   GraphQLAPIkey,
   GraphQLEndpoint,
+  removeClassResolver,
+  setDefaultClassResolver,
 };
 /**
  *

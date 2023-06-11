@@ -16,7 +16,7 @@ import {
   useDisclosure,
   Button,
 } from '@chakra-ui/react';
-import { SignedOut, SignedIn, UserButton } from 'gatsby-plugin-clerk';
+import { SignedOut, SignedIn, UserButton, useUser } from 'gatsby-plugin-clerk';
 import {
   HamburgerIcon,
   CloseIcon,
@@ -47,15 +47,10 @@ const NAV_ITEMS: Array<NavItem> = [
       },
     ],
   },
-  {
-    label: `Our Discord`,
-    href: `https://discord.gg/SmF2qJeF6P`,
-  },
 ];
 
 export default function WithSubnavigation() {
   const { isOpen, onToggle } = useDisclosure();
-
   return (
     <Box>
       <Flex
@@ -157,10 +152,35 @@ const DesktopNav = () => {
   const linkColor = useColorModeValue(`gray.600`, `gray.200`);
   const linkHoverColor = useColorModeValue(`gray.800`, `white`);
   const popoverContentBgColor = useColorModeValue(`white`, `gray.800`);
-
+  const { isSignedIn } = useUser();
+  const dashboardItems: Array<NavItem> = isSignedIn
+    ? [
+        {
+          label: `Dashboard`,
+          children: [
+            {
+              label: `Raids`,
+              subLabel: `Current Raids`,
+              href: `/dashboard/`,
+            },
+            {
+              label: `Classes`,
+              subLabel: `Class setup and overview`,
+              href: `/dashboard/classes`,
+            },
+          ],
+        },
+      ]
+    : [];
+  const discordPage = [
+    {
+      label: `Our Discord`,
+      href: `https://discord.gg/SmF2qJeF6P`,
+    },
+  ];
   return (
     <Stack direction={`row`} spacing={4}>
-      {NAV_ITEMS.map((navItem) => (
+      {[...NAV_ITEMS, ...dashboardItems, ...discordPage].map((navItem) => (
         <Box key={navItem.label}>
           <Popover trigger={`hover`} placement={`bottom-start`}>
             <PopoverTrigger>

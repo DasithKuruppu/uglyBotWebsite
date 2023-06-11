@@ -39,10 +39,9 @@ export default function Dashboard() {
     (async () => {
       const serverDataList =
         (isSignedIn && (await getServerRaidData(user?.id as string))) || [];
-      console.log({ userId: user?.id });
-      const memberClasses =
-        (isSignedIn && (await getMemberData(user?.id))) || [];
-      console.log({ memberClasses });
+      const userId = user?.id;
+      const memberClasses = (userId && (await getMemberData(userId))) || [];
+      console.log({ memberClasses, user });
       setServerList(
         serverDataList.map(({ id, name, owner, icon, raids }) => {
           const avatar = icon

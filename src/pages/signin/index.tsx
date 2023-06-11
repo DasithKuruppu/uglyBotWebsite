@@ -4,7 +4,10 @@ import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
 import { SignIn, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 import * as styles from './_signin.module.css';
-export default function Home() {
+export default function SignInPage({ location }: any) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+  console.log({ location });
+  const redirectTo = location.search.split(`?redirectTo=`)[1];
   return (
     <main>
       <NavBar />
@@ -23,7 +26,7 @@ export default function Home() {
             },
           }}
           signUpUrl="/signup"
-          redirectUrl="/dashboard"
+          redirectUrl={redirectTo || `/dashboard/classes`}
         />
       </SignedOut>
       {/* </Container>
