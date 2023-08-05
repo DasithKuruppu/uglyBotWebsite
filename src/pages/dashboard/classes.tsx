@@ -67,6 +67,7 @@ export default function ClassesList() {
             className,
             optionalClasses,
             artifactsList,
+            companions,
             mountsList,
             updatedAt,
           }: any) => {
@@ -74,6 +75,7 @@ export default function ClassesList() {
               discordMemberId,
               className,
               optionalClasses,
+              companions,
               artifactsList,
               mountsList,
               updatedAt,
@@ -84,7 +86,7 @@ export default function ClassesList() {
       );
       isSignedIn && setClassesLoaded(true);
     })();
-  }, [user?.id, isSignedIn, classesLoaded]);
+  }, [user, user?.id, isSignedIn, classesLoaded]);
   return (
     <ChakraProvider theme={theme}>
       <main>

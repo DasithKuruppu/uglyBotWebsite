@@ -61,19 +61,19 @@ export default function BasicStatistics() {
       >
         <StatsCard
           title={`Users`}
-          stat={`2,000`}
+          stat={`2,500`}
           bg={`orange.500`}
           icon={<BsPerson size={`3em`} />}
         />
         <StatsCard
           title={`Servers`}
-          stat={`100+`}
+          stat={`130+`}
           bg={`green.500`}
           icon={<FiServer size={`3em`} />}
         />
         <StatsCard
           title={`Requests per month`}
-          stat={`1 Million`}
+          stat={`1.5 Million`}
           bg={`blue.500`}
           icon={<MdQueryStats size={`3em`} />}
         />

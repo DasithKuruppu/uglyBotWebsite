@@ -261,13 +261,39 @@ const DesktopSubNav = ({ label, href, subLabel }: NavItem) => {
 };
 
 const MobileNav = () => {
+  const { isSignedIn } = useUser();
+  const dashboardItems: Array<NavItem> = isSignedIn
+    ? [
+        {
+          label: `Dashboard`,
+          children: [
+            {
+              label: `Raids`,
+              subLabel: `Current Raids`,
+              href: `/dashboard/`,
+            },
+            {
+              label: `Classes`,
+              subLabel: `Class setup and overview`,
+              href: `/dashboard/classes`,
+            },
+          ],
+        },
+      ]
+    : [];
+  const discordPage = [
+    {
+      label: `Our Discord`,
+      href: `https://discord.gg/SmF2qJeF6P`,
+    },
+  ];
   return (
     <Stack
       bg={useColorModeValue(`white`, `gray.800`)}
       p={4}
       display={{ md: `none` }}
     >
-      {NAV_ITEMS.map((navItem) => (
+      {[...NAV_ITEMS, ...dashboardItems, ...discordPage].map((navItem) => (
         <MobileNavItem key={navItem.label} {...navItem} />
       ))}
     </Stack>

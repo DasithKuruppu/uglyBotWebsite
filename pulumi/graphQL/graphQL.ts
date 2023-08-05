@@ -5,6 +5,7 @@ import { graphQLHandlerFunction } from '../lambdas/queryHandler';
 import { createMemberDataSources } from './members/members';
 import { removeClassDataSources } from './classes/removeClass';
 import { setDefaultClassDataSources } from './classes/setDefaultClass';
+import { setCompanionDataSource } from './classes/setCompanions';
 import { prodMembers } from '../dynamodb/members';
 import { getEnvironmentFromStack } from '../utils/stackEnvMap';
 
@@ -29,6 +30,7 @@ const schema = `
     type Mutation {
       removeClass(userId: String!, className: String!): [Member]
       setDefaultClass(userId: String!, className: String!): [Member]
+      setCompanions(userId: String!, className: String!, companions: [String]!): [Member]
     }
 
     type Member {
@@ -37,6 +39,7 @@ const schema = `
         artifactsList: [String]
         mountsList: [String]
         optionalClasses: [String]
+        companions: [String]
         default: Boolean
         serverId: String
         updatedAt: String
@@ -170,6 +173,12 @@ const { setDefaultClassResolver } = setDefaultClassDataSources({
   environmentName,
   dataSourceLambdaRequestProcessor,
 });
+
+const { setCompanionResolver } = setCompanionDataSource({
+  api,
+  environmentName,
+  dataSourceLambdaRequestProcessor,
+});
 // A resolver for the [addTenant] mutation
 // const addResolver = new aws.appsync.Resolver(`add-resolver`, {
 //   apiId: api.id,
@@ -197,6 +206,7 @@ export {
   GraphQLEndpoint,
   removeClassResolver,
   setDefaultClassResolver,
+  setCompanionResolver,
 };
 /**
  *

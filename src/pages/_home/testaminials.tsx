@@ -119,27 +119,32 @@ export default function WithSpeechBubbles() {
           </Testimonial>
           <Testimonial>
             <TestimonialContent>
-              <TestimonialHeading>
-                Why is it making pancakes forever ?
-              </TestimonialHeading>
+              <TestimonialHeading>Questionable advices...</TestimonialHeading>
               <TestimonialText>
-                I don&apos;t know why it&apos;s making pancakes forever
-                sometimes.
-              </TestimonialText>
-            </TestimonialContent>
-            <TestimonialAvatar name={`Jane`} title={`Owner of Cohive`} />
-          </Testimonial>
-          <Testimonial>
-            <TestimonialContent>
-              <TestimonialHeading>Why is it so ugly ?</TestimonialHeading>
-              <TestimonialText>
-                The ugliest bot I ever seen, how do I make it more beautiful ?
+                I missed a hypo and Uglybot told the raid leader to kick me from
+                the run
               </TestimonialText>
             </TestimonialContent>
             <TestimonialAvatar
-              src={`https://images.unsplash.com/photo-1586297135537-94bc9ba060aa?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80`}
-              name={`Jenny Cooper`}
-              title={`Writer`}
+              name={`Lunk`}
+              title={`Disgruntled DPS`}
+              src="https://cdn.discordapp.com/avatars/369255179201150976/a1e96651f700db6454326c3db66fc1e3?size=128"
+            />
+          </Testimonial>
+          <Testimonial>
+            <TestimonialContent>
+              <TestimonialHeading>Phase zero issues...</TestimonialHeading>
+              <TestimonialText>
+                Before I used to spend 15 minutes on Phase zero organising the
+                group. With UglyBot sorting takes a matter of seconds but I
+                still spend as much time as now others argue about who should be
+                on which artifact and why.
+              </TestimonialText>
+            </TestimonialContent>
+            <TestimonialAvatar
+              src={`https://cdn.discordapp.com/avatars/243410909349937154/ce617c4ecbb81cf4b6ac34f1cf94d9db?size=128`}
+              name={`Deadmano`}
+              title={`Streamer`}
             />
           </Testimonial>
         </Stack>

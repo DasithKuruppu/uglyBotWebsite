@@ -16,6 +16,7 @@ export const getMemberData = async (userId: string) => {
           serverId
           updatedAt
           userStatus
+          companions
         }
       }
     `,
@@ -43,6 +44,7 @@ export const removeClass = async (userId: string, className: string) => {
           serverId
           updatedAt
           userStatus
+          companions
         }
       }
     `,
@@ -70,6 +72,7 @@ export const setDefaultClass = async (userId: string, className: string) => {
           serverId
           updatedAt
           userStatus
+          companions
         }
       }
     `,
@@ -80,4 +83,44 @@ export const setDefaultClass = async (userId: string, className: string) => {
   });
   console.log({ classData });
   return classData?.setDefaultClass;
+};
+
+export const updateCompanions = async (
+  userId: string,
+  className: string,
+  companions: string[],
+) => {
+  const classData: any = await request({
+    url: GRAPHQL_ENDPOINT,
+    document: gql`
+      mutation setCompanions(
+        $id: String!
+        $className: String!
+        $companions: [String]!
+      ) {
+        setCompanions(
+          userId: $id
+          className: $className
+          companions: $companions
+        ) {
+          discordMemberId
+          className
+          default
+          artifactsList
+          mountsList
+          optionalClasses
+          serverId
+          updatedAt
+          userStatus
+          companions
+        }
+      }
+    `,
+    variables: { id: userId, className, companions },
+    requestHeaders: {
+      'x-api-key': API_KEY,
+    },
+  });
+  console.log({ classData });
+  return classData?.setCompanions;
 };

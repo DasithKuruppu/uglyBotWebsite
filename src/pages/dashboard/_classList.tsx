@@ -12,15 +12,20 @@ import {
   Center,
   Divider,
   Highlight,
+  Checkbox,
 } from '@chakra-ui/react';
 import { ArtifactsList } from '@/consts/artifactsList';
 import { MountsList } from '@/consts/mountsList';
 import { CompanionList } from '@/consts/companionsList';
 import { getClassOptionsList } from '@/consts/classList';
 import { CheckIcon, CloseIcon } from '@chakra-ui/icons';
-import { removeClass, setDefaultClass } from '@/hooks/useMemberData';
+import {
+  removeClass,
+  setDefaultClass,
+  updateCompanions,
+} from '@/hooks/useMemberData';
 import { useUser } from 'gatsby-plugin-clerk';
-import { MultiSelect, useMultiSelect } from 'chakra-multiselect';
+// import { MultiSelect, useMultiSelect } from 'chakra-multiselect';
 
 function ClassWrapper({ children }: { children: ReactNode }) {
   return (
@@ -45,21 +50,47 @@ export default function ClassList({
   memberClassesList: any[];
   setClassesLoaded: (state: boolean) => void;
 }) {
+  const initialCompanionsList = memberClassesList.map(
+    ({ className, companions }) => {
+      const companionsList = companions || [];
+      return [className, companionsList];
+    },
+  );
   const { user } = useUser();
   const [deleteState, setDeleteState] = useState([] as any[]);
   const [currentDefaultClass, setDefaultClassName] = useState(null as any);
-  const {
-    value: currentCompanionsList,
-    options,
-    onChange: changeCompSelection,
-  } = useMultiSelect({
-    value: [],
-    options:
-      CompanionList.map(({ label }) => ({
-        label,
-        value: label,
-      })) || [],
-  });
+  const [currentCompanionsList, setCompanionsList] = useState(
+    initialCompanionsList,
+  );
+
+  const onCompanionCheck = (
+    className: string,
+    companionName: string,
+    isChecked: boolean,
+  ) => {
+    console.log({ className, companionName });
+    const [existingClass, checkedCompanions] = currentCompanionsList.find(
+      ([existingClassName]) => existingClassName === className,
+    ) || [null, []];
+    console.log({ existingClass, checkedCompanions });
+    const prevCompanions = checkedCompanions.filter(
+      (checkedCompanion: string) => checkedCompanion !== companionName,
+    );
+    const newCompanions = !isChecked
+      ? prevCompanions
+      : [...prevCompanions, companionName];
+    console.log({ companionName, isChecked, newCompanions });
+    setCompanionsList([
+      ...currentCompanionsList.filter(
+        ([existingClassName]) => existingClassName !== className,
+      ),
+      [className, newCompanions],
+    ]);
+
+    /* await updateCompanions(user?.id as string, className, value); */
+    // setClassesLoaded(false);
+  };
+  console.log({ currentCompanionsList });
   const onRemoveClass = async (className: string) => {
     setDeleteState([...deleteState, className]);
     const result = await removeClass(user?.id as string, className);
@@ -71,17 +102,20 @@ export default function ClassList({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSaveClass = async (className: string) => {
     // const result = await onSaveClass(user?.id as string, className);
+    const [existingClass, savableCompanions] = currentCompanionsList.find(
+      ([existingClassName]) => existingClassName === className,
+    ) || [undefined, []];
+    if (existingClass) {
+      console.log({ savableCompanions, className });
+      await updateCompanions(user?.id as string, className, savableCompanions);
+    }
     setClassesLoaded(false);
   };
 
   const OnSetDefaultClass = async (className: string) => {
     setDefaultClassName(className);
-    const defaultClassResult = await setDefaultClass(
-      user?.id as string,
-      className,
-    );
+    await setDefaultClass(user?.id as string, className);
     setClassesLoaded(false);
-    console.log({ defaultClassResult });
   };
   const processedMemberClassList = memberClassesList
     .filter(({ className }) => {
@@ -102,7 +136,7 @@ export default function ClassList({
         direction={`column`}
         textAlign="center"
         justify="center"
-        spacing={{ base: 4, md: 8 }}
+        spacing={{ base: 2, md: 8 }}
         py={10}
         maxW={`100%`}
       >
@@ -114,7 +148,7 @@ export default function ClassList({
               optionalClasses = [],
               artifactsList = [],
               mountsList = [],
-              companionList = [],
+              companions = [],
               defaultClass = false,
               updatedAt,
             },
@@ -198,7 +232,7 @@ export default function ClassList({
                     alignSelf={`center`}
                     width={`100%`}
                   >
-                    <Box width={{ base: `100%`, md: `50%` }}>
+                    <Box width={{ base: `100%`, md: `33%` }}>
                       <Text fontWeight="400" fontSize="xl">
                         Artifacts
                       </Text>
@@ -256,8 +290,11 @@ export default function ClassList({
                         Companions
                       </Text>
                       <Wrap spacing={3} textAlign="center" px={12}>
-                        {(companionList || []).map(
-                          (companion: any, index: number) => {
+                        {(CompanionList || []).map(
+                          ({ shortName: companion }: any, index: number) => {
+                            const isExisting = (companions || []).includes(
+                              companion,
+                            );
                             const companionId = CompanionList.find(
                               ({ shortName }) => shortName === companion,
                             )?.emoji.id;
@@ -272,17 +309,33 @@ export default function ClassList({
                                     rounded={`md`}
                                   />
                                 </Center>
+                                <Checkbox
+                                  size="lg"
+                                  colorScheme="green"
+                                  alignSelf={`center`}
+                                  defaultChecked={isExisting}
+                                  onChange={(event) => {
+                                    const isChecked = event.target.checked;
+                                    onCompanionCheck(
+                                      className,
+                                      companion,
+                                      isChecked,
+                                    );
+                                  }}
+                                >
+                                  {companion}
+                                </Checkbox>
                               </WrapItem>
                             );
                           },
                         )}
                       </Wrap>
-                      <MultiSelect
+                      {/* <MultiSelect
                         options={options}
                         value={currentCompanionsList}
                         label="Choose companions"
-                        onChange={changeCompSelection as any}
-                      />
+                        onChange={onCompanionChange(className) as any}
+                      /> */}
                     </Box>
                   </Stack>
 
@@ -294,6 +347,7 @@ export default function ClassList({
                         colorScheme="green"
                         variant="outline"
                         mx={4}
+                        mt={4}
                         onClick={() => OnSetDefaultClass(className)}
                       >
                         Default
@@ -305,6 +359,7 @@ export default function ClassList({
                       colorScheme="red"
                       variant="solid"
                       mx={4}
+                      mt={4}
                       onClick={() => onRemoveClass(className)}
                     >
                       Remove
@@ -315,6 +370,7 @@ export default function ClassList({
                       colorScheme="green"
                       variant="solid"
                       mx={4}
+                      mt={4}
                       onClick={() => onSaveClass(className)}
                     >
                       Save
